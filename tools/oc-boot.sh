@@ -77,6 +77,11 @@ echo "::endgroup::"
 # right index.php (admin566 for /admin566, front otherwise). php -S has no .htaccess.
 cat > router.php <<'PHP'
 <?php
+// SSL is terminated at the Cloudflare tunnel, so php -S sees plain HTTP while
+// OpenCart's config URLs are https:// - without this OpenCart bounces admin
+// login <-> home forever. Present the request to OpenCart as HTTPS.
+$_SERVER['HTTPS'] = 'on';
+$_SERVER['SERVER_PORT'] = 443;
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $file = __DIR__ . $path;
 if ($path !== '/' && is_file($file) && substr($path, -4) !== '.php') { return false; }

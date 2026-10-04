@@ -38,13 +38,18 @@ php -d error_reporting=0 -d display_errors=0 -S 127.0.0.1:8080 router.php >/tmp/
 sleep 3
 home_code=$(curl -s -o /tmp/home.html -w "%{http_code}" "$CRAWL/")
 echo "  front home -> $home_code"
+  echo "  DEBUG raw home hrefs (as OpenCart renders them):"
+  curl -s "$CRAWL/" | grep -oE 'href="[^"]*contact[^"]*"' | head -2
+  echo "  DEBUG literal vs encoded slash:"
+  echo "    literal  -> $(curl -s "$CRAWL/index.php?route=information/contact" | grep -oiE '<title>[^<]*' | head -1)"
+  echo "    encoded  -> $(curl -s "$CRAWL/index.php?route=information%2Fcontact" | grep -oiE '<title>[^<]*' | head -1)"
 if [ "$home_code" != "200" ]; then
   echo "  front-end not healthy ($home_code) - keeping the existing published site. DB/app are saved."
   tail -5 /tmp/php_save.log 2>/dev/null
   exit 0
 fi
 
-if [ "${DEBUG_ROUTES:-true}" = "true" ]; then
+if [ "${DEBUG_ROUTES:-false}" = "true" ]; then
   echo "  DEBUG route titles (direct curl to php -S):"
   for r in "index.php?route=information/contact" "index.php?route=product/category&path=59" "contact" "index.php?route=common/home"; do
     t=$(curl -s "$CRAWL/$r" | grep -oiE '<title>[^<]*' | head -1)

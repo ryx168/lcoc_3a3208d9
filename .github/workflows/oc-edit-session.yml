@@ -59,6 +59,7 @@ jobs:
       TUNNEL_TOKEN: ${{ secrets.TUNNEL_TOKEN }}
       PAGES_PROJECT: ${{ secrets.PAGES_PROJECT }}
       SITE_HOST: ${{ secrets.SITE_HOST }}
+      FMAUTH_KEY: ${{ secrets.FMAUTH_KEY }}
       IDLE_MINUTES: ${{ inputs.idle_minutes }}
       DRY_RUN: ${{ inputs.dry_run }}
       MAX_KEYS: ${{ inputs.max_keys }}

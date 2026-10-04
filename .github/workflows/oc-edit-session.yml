@@ -36,6 +36,9 @@ jobs:
   session:
     runs-on: ubuntu-22.04
     timeout-minutes: 350
+    # The session publishes the file-manager URL to the files-session branch.
+    permissions:
+      contents: write
     services:
       mysql:
         image: mysql:5.7

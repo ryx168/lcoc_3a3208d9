@@ -44,6 +44,14 @@ if [ "$home_code" != "200" ]; then
   exit 0
 fi
 
+if [ "${DEBUG_ROUTES:-true}" = "true" ]; then
+  echo "  DEBUG route titles (direct curl to php -S):"
+  for r in "index.php?route=information/contact" "index.php?route=product/category&path=59" "contact" "index.php?route=common/home"; do
+    t=$(curl -s "$CRAWL/$r" | grep -oiE '<title>[^<]*' | head -1)
+    echo "    [$r] -> ${t:-<none>}"
+  done
+fi
+
 OUT=/tmp/ocexport; rm -rf "$OUT"; mkdir -p "$OUT"
 # Mirror the whole linked front-end. Query-URL stores (SEO off) become
 # index.php%3Froute=...html files; SEO stores become keyword .html files - both

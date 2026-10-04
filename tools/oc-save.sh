@@ -38,11 +38,6 @@ php -d error_reporting=0 -d display_errors=0 -S 127.0.0.1:8080 router.php >/tmp/
 sleep 3
 home_code=$(curl -s -o /tmp/home.html -w "%{http_code}" "$CRAWL/")
 echo "  front home -> $home_code"
-  echo "  DEBUG raw home hrefs (as OpenCart renders them):"
-  curl -s "$CRAWL/" | grep -oE 'href="[^"]*contact[^"]*"' | head -2
-  echo "  DEBUG literal vs encoded slash:"
-  echo "    literal  -> $(curl -s "$CRAWL/index.php?route=information/contact" | grep -oiE '<title>[^<]*' | head -1)"
-  echo "    encoded  -> $(curl -s "$CRAWL/index.php?route=information%2Fcontact" | grep -oiE '<title>[^<]*' | head -1)"
 if [ "$home_code" != "200" ]; then
   echo "  front-end not healthy ($home_code) - keeping the existing published site. DB/app are saved."
   tail -5 /tmp/php_save.log 2>/dev/null
@@ -81,6 +76,13 @@ wget --mirror --page-requisites --adjust-extension --convert-links --no-verbose 
     [ "$b" != "$nb" ] && mv -f "$f" "$d/$nb"
   done )
 
+  echo "  DEBUG on-disk after crawl+rename:"
+  cf="$OUT/index.php%3Froute=information%252Fcontact.html"
+  echo "    contact file exists: $([ -f "$cf" ] && echo yes || echo NO)"
+  echo "    contact on-disk title: $(grep -oiE '<title>[^<]*' "$cf" 2>/dev/null | head -1)"
+  idx="$OUT/index.html"
+  same=$(find "$OUT" -name '*.html' -exec cmp -s {} "$idx" \; -print 2>/dev/null | wc -l)
+  echo "    html files identical to index.html: $same / $(find "$OUT" -name '*.html' | wc -l)"
 pages=$(find "$OUT" -name "*.html" | wc -l)
 echo "  crawled pages: $pages"
 MIN_PAGES="${MIN_PAGES:-5}"
